@@ -362,7 +362,6 @@ def random_name(): #随机字符串
     uuid_str = uuid.uuid4().hex
     return uuid_str
 
-def debug():
 
 if __name__ == '__main__':
     title()
@@ -418,7 +417,4 @@ if __name__ == '__main__':
         content = ispirit_upload(target_url) # 批量5 通达11.3任意文件上传 结合
         write_file(content)
         title_end()
-
-    elif selection == 0:
-        debug()
 
