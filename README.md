@@ -1,8 +1,17 @@
 # tongda-kite
 
+通达综合利用脚本项目地址：[tongda-kite](https://github.com/kitezzzGrim/tongda-exp)
+
 `通达常见的exp`
 
 `个人编写的exp,仅供学习和研究使用,请勿使用文中的技术源码用于非法用途,任何人造成的任何负面影响,与本人无关`
+
+
+用法：
+
+```py
+python tongda-kite.py
+```
 
 ```
 1 = [探测目标URL的通达版本信息]
@@ -24,3 +33,8 @@
 ![image](./img/2.jpg)
 
 ![image](./img/3.jpg)
+
+
+---
+
+> create by ffffffff0x
